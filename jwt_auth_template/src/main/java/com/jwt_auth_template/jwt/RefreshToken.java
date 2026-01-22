@@ -18,10 +18,13 @@ public class RefreshToken {
     @Setter(AccessLevel.NONE)
     private Long id;
 
+    @Column(nullable = false,unique = true)
     private String memberIdentifier;
 
+    @Column(nullable = false)
     private String refreshToken;
 
+    @Column(nullable = false)
     private LocalDateTime expiresAt;
 
     public static RefreshToken createRefreshToken(

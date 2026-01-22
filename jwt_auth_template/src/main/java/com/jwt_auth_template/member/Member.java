@@ -16,17 +16,26 @@ public class Member {
     @Setter(AccessLevel.NONE)
     private Long id;
 
+    @Column(nullable = false)
     private boolean isActive;
 
+    @Column(nullable = false)
     private String name;
 
     @Enumerated(EnumType.STRING)
-    private MemberRole role;
+    @Column(nullable = false)
+    private MemberRole memberRole;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private AuthType authType;
 
-    private String password;
+    private String oauthId;//OAuth2 외부 인증일때만 사용
+
+    @Column(unique = true)
+    private String email;//이메일 로그인일 때만 사용
+
+    private String password;//이메일 로그인일 때만 사용
 
     public static Member createMember(
             boolean isActive,
@@ -38,7 +47,7 @@ public class Member {
         Member member = new Member();
         member.setActive(isActive);
         member.setName(name);
-        member.setRole(memberRole);
+        member.setMemberRole(memberRole);
         member.setAuthType(authType);
         member.setPassword(password);
         return member;
