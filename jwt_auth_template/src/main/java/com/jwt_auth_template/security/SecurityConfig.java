@@ -27,12 +27,13 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
+    /*@Bean
     public AuthenticationManager authenticationManager() {
         return new ProviderManager(Arrays.asList(
                 //아직 provider 만든거 없음
         ));
-    }
+    }*/
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
