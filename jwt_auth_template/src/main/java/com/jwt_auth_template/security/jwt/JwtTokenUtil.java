@@ -14,13 +14,12 @@ import org.springframework.util.StringUtils;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.Date;
 
 @Component
 @RequiredArgsConstructor
 public class JwtTokenUtil {
-    private final JwtProperties jwtProperties=new JwtProperties();
+    private final JwtProperties jwtProperties;
     private final RefreshTokenRepository refreshTokenRepository;
 
     private SecretKey key;
@@ -63,10 +62,15 @@ public class JwtTokenUtil {
     }
 
     public String extractJwtTokenFromRequest(HttpServletRequest request){
-        String token = request.getHeader("Authorization");
+        String headerValue = request.getHeader("Authorization");
 
-        if (StringUtils.hasText(token) && token.startsWith("Bearer ")) {
-            return token.substring(7);
+        if (StringUtils.hasText(headerValue) && headerValue.startsWith("Bearer ")) {
+            String token = headerValue.substring(7);
+
+            if(token.isEmpty())
+                return null;
+
+            return token;
         }
 
         return null;

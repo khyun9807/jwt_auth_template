@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import java.time.Duration;
 
 @Getter
+@Component
 public class JwtProperties {
     @Value("${jwt.secret-key}")
     private String secretKey;
@@ -20,7 +21,11 @@ public class JwtProperties {
     @Getter(AccessLevel.NONE)
     private Duration refreshTokenExpiration;
 
-    private final long accessTokenTime=accessTokenExpiration.toMillis();
+    public long getAccessTokenTime() {
+        return accessTokenExpiration.toMillis();
+    }
 
-    private final long refreshTokenTime=refreshTokenExpiration.toMillis();
+    public long getRefreshTokenTime() {
+        return refreshTokenExpiration.toMillis();
+    }
 }
