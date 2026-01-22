@@ -6,7 +6,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 public class LoginWithKakaoRequestDto {
     private String oAuthToken;
 }
