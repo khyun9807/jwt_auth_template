@@ -1,15 +1,15 @@
 package com.jwt_auth_template.security.exception;
 
-public class AuthorizationException extends RuntimeException{
-    public AuthorizationException() {
-        super();
+import org.jspecify.annotations.Nullable;
+import org.springframework.security.core.AuthenticationException;
+
+public class AuthorizationException extends AuthenticationException {
+
+    public AuthorizationException(@Nullable String msg, Throwable cause) {
+        super(msg, cause);
     }
 
-    public AuthorizationException(String message) {
-        super(message);
-    }
-
-    public AuthorizationException(String message, Throwable cause) {
-        super(message, cause);
+    public AuthorizationException(@Nullable String msg) {
+        super(msg);
     }
 }

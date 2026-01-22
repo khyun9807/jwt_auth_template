@@ -1,0 +1,40 @@
+package com.jwt_auth_template.jwt;
+
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.DateTimeException;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@SpringBootTest
+@Transactional
+class RefreshTokenRepositoryTest {
+
+    @Autowired
+    private RefreshTokenRepository refreshTokenRepository;
+
+    @Test
+    void setAndGetRefreshToken() {
+        RefreshToken refreshToken = RefreshToken.createRefreshToken(
+                "323",
+                "afsdasdf",
+                LocalDateTime.now()
+        );
+        refreshTokenRepository.save(refreshToken);
+
+        Optional<RefreshToken> findRefreshToken =
+                refreshTokenRepository
+                        .findById(refreshToken.getId());
+
+        Assertions.assertThat(findRefreshToken).isPresent();
+        Assertions.assertThat(findRefreshToken.get())
+                .isEqualTo(refreshToken);
+    }
+
+}

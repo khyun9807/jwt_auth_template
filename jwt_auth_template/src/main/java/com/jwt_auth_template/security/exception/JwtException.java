@@ -1,19 +1,14 @@
 package com.jwt_auth_template.security.exception;
 
-public class JwtException extends RuntimeException{
-    public JwtException() {
-        super();
+import org.jspecify.annotations.Nullable;
+import org.springframework.security.core.AuthenticationException;
+
+public class JwtException extends AuthenticationException {
+    public JwtException(@Nullable String msg, Throwable cause) {
+        super(msg, cause);
     }
 
-    public JwtException(String message) {
-        super(message);
-    }
-
-    public JwtException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public JwtException(Throwable cause) {
-        super(cause);
+    public JwtException(@Nullable String msg) {
+        super(msg);
     }
 }

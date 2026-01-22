@@ -1,4 +1,4 @@
-package com.jwt_auth_template.security.exception;
+package com.jwt_auth_template.auth.exception;
 
 public class OAuthException extends RuntimeException{
     public OAuthException() {
