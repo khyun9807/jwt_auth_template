@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,7 +25,7 @@ class RefreshTokenRepositoryTest {
         RefreshToken refreshToken = RefreshToken.createRefreshToken(
                 "323",
                 "afsdasdf",
-                LocalDateTime.now()
+                new Date()
         );
         refreshTokenRepository.save(refreshToken);
 

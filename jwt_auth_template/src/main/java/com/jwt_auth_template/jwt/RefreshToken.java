@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Getter
@@ -25,12 +26,12 @@ public class RefreshToken {
     private String refreshToken;
 
     @Column(nullable = false)
-    private LocalDateTime expiresAt;
+    private Date expiresAt;
 
     public static RefreshToken createRefreshToken(
             String memberIdentifier,
             String refreshToken,
-            LocalDateTime expiresAt
+            Date expiresAt
     ) {
         RefreshToken token = new RefreshToken();
         token.setMemberIdentifier(memberIdentifier);
