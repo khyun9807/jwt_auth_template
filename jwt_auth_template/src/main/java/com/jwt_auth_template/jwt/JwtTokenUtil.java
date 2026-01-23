@@ -4,9 +4,12 @@ import com.jwt_auth_template.security.exception.JwtTokenException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
@@ -37,7 +40,7 @@ public class JwtTokenUtil {
                         (jwtType == JwtType.REFRESH ? jwtProperties.getRefreshTokenTime() : jwtProperties.getAccessTokenTime())
         );
 
-        String token = Jwts.builder()
+        return Jwts.builder()
                 .header()
                 .type(jwtType.name())
                 .and()
@@ -46,17 +49,36 @@ public class JwtTokenUtil {
                 .expiration(expDate)
                 .signWith(key)
                 .compact();
+    }
 
-        if(jwtType.equals(JwtType.REFRESH)){
-            RefreshToken refreshToken = RefreshToken.createRefreshToken(
-                    memberIdentifier,
-                    token,
-                    expDate
-            );
-            refreshTokenRepository.save(refreshToken);
-        }
+    public RefreshTokenEntity generateRefreshTokenEntity(
+            String memberIdentifier, String token, Date now
+    ) {
+        Date expDate = new Date(
+                now.getTime() +
+                        jwtProperties.getRefreshTokenTime());
 
-        return token;
+        return RefreshTokenEntity.createRefreshToken(
+                memberIdentifier,
+                token,
+                expDate
+        );
+    }
+
+    //@Transactional
+    public void saveRefreshTokenEntity(RefreshTokenEntity refreshTokenEntity) {
+        //refreshTokenRepository.deleteByMemberIdentifier(refreshTokenEntity.getMemberIdentifier());
+        //refreshTokenRepository.flush();
+        refreshTokenRepository.save(refreshTokenEntity);
+    }
+
+    public void setCookieRefreshToken(RefreshTokenEntity refreshTokenEntity, HttpServletResponse response){
+        Cookie cookie = new Cookie("refreshToken", refreshTokenEntity.getRefreshToken());
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        int age = (int)((new Date()).getTime() - refreshTokenEntity.getExpiresAt().getTime()/1000);
+        cookie.setMaxAge(age);
+        response.addCookie(cookie);
     }
 
     public String extractJwtTokenFromRequest(HttpServletRequest request){

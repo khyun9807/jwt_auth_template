@@ -31,7 +31,7 @@ public class TestController {
             @RequestBody
             LoginWithKakaoRequestDto loginWithKakaoRequestDto
     ) {
-        System.out.println("loginWithKakaoRequestDto.getOAuthToken() = " + loginWithKakaoRequestDto.getOAuthToken());
-        return ResponseEntity.ok(kakaoOAuthUtil.getMemberInfoFromOAuthToken(loginWithKakaoRequestDto.getOAuthToken()));
+        System.out.println("loginWithKakaoRequestDto.getOauthToken() = " + loginWithKakaoRequestDto.getOauthToken());
+        return ResponseEntity.ok(kakaoOAuthUtil.getMemberInfoFromOAuthToken(loginWithKakaoRequestDto.getOauthToken()));
     }
 }

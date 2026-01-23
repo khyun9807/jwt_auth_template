@@ -2,7 +2,7 @@ package com.jwt_auth_template.security.jwt;
 
 import com.jwt_auth_template.jwt.JwtTokenUtil;
 import com.jwt_auth_template.jwt.JwtType;
-import com.jwt_auth_template.jwt.RefreshToken;
+import com.jwt_auth_template.jwt.RefreshTokenEntity;
 import com.jwt_auth_template.jwt.RefreshTokenRepository;
 import com.jwt_auth_template.security.exception.JwtTokenException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -63,12 +63,12 @@ class JwtTokenUtilTest {
 
         // then
         Assertions.assertThat(token).isNotBlank();
-        verify(refreshTokenRepository, times(1)).save(any(RefreshToken.class));
+        verify(refreshTokenRepository, times(1)).save(any(RefreshTokenEntity.class));
 
-        ArgumentCaptor<RefreshToken> captor = ArgumentCaptor.forClass(RefreshToken.class);
+        ArgumentCaptor<RefreshTokenEntity> captor = ArgumentCaptor.forClass(RefreshTokenEntity.class);
         verify(refreshTokenRepository).save(captor.capture());
 
-        RefreshToken saved = captor.getValue();
+        RefreshTokenEntity saved = captor.getValue();
         Assertions.assertThat(saved.getMemberIdentifier()).isEqualTo(memberIdentifier);
         Assertions.assertThat(saved.getRefreshToken()).isEqualTo(token);
         Assertions.assertThat(saved.getExpiresAt()).isNotNull();

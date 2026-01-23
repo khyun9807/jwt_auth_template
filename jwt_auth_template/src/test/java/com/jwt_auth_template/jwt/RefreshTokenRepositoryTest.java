@@ -18,20 +18,20 @@ class RefreshTokenRepositoryTest {
 
     @Test
     void setAndGetRefreshToken() {
-        RefreshToken refreshToken = RefreshToken.createRefreshToken(
+        RefreshTokenEntity refreshTokenEntity = RefreshTokenEntity.createRefreshToken(
                 "323",
                 "afsdasdf",
                 new Date()
         );
-        refreshTokenRepository.save(refreshToken);
+        refreshTokenRepository.save(refreshTokenEntity);
 
-        Optional<RefreshToken> findRefreshToken =
+        Optional<RefreshTokenEntity> findRefreshToken =
                 refreshTokenRepository
-                        .findById(refreshToken.getId());
+                        .findById(refreshTokenEntity.getId());
 
         Assertions.assertThat(findRefreshToken).isPresent();
         Assertions.assertThat(findRefreshToken.get())
-                .isEqualTo(refreshToken);
+                .isEqualTo(refreshTokenEntity);
     }
 
 }

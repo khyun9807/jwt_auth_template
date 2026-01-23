@@ -6,5 +6,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class JoinWithKakaoRequestDto {
-    private String oAuthAccessToken;
+    private String oauthToken;
 }

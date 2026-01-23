@@ -1,16 +1,17 @@
 package com.jwt_auth_template.member;
 
+import com.jwt_auth_template.auth.dto.OAuthMemberInfo;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.repository.core.support.RepositoryMethodInvocationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class MemberService {
     private final MemberRepository memberRepository;
-    private final RepositoryMethodInvocationListener repositoryMethodInvocationListener;
 
     public Member save(final Member member) {
         validateDuplicate(member);
@@ -19,15 +20,13 @@ public class MemberService {
     }
 
     private void validateDuplicate(final Member member) {
-        Member findMember = switch (member.getAuthType()) {
-            case EMAIL ->
-                    memberRepository.findByEmailAndActive(member.getEmail(),true);
-            case KAKAO ->
-                    memberRepository.findByOauthIdAndActive(member.getOauthId(),true);
-            default -> null;
+        Optional<Member> findMember = switch (member.getAuthType()) {
+            case EMAIL -> memberRepository.findByEmailAndActive(member.getEmail(), true);
+            case KAKAO -> memberRepository.findByOauthIdAndActive(member.getOauthId(), true);
+            default -> Optional.empty();
         };
 
-        if(findMember != null) {
+        if (findMember.isPresent()) {
             throw new MemberException("member already exists");
         }
     }
@@ -38,6 +37,21 @@ public class MemberService {
 
         if (!member.isActive()) {
             throw new MemberException("member inactivated");
+        }
+        return member;
+    }
+
+    public Member getActiveOAuthMember(OAuthMemberInfo oAuthMemberInfo) {
+        Member member =
+                memberRepository.findByOauthIdAndNameAndAuthType(
+                                oAuthMemberInfo.getOauthId(),
+                                oAuthMemberInfo.getName(),
+                                oAuthMemberInfo.getAuthType()
+                        )
+                        .orElseThrow(() -> new MemberException("oauth member not found"));
+
+        if (!member.isActive()) {
+            throw new MemberException("oauth member inactivated");
         }
         return member;
     }
