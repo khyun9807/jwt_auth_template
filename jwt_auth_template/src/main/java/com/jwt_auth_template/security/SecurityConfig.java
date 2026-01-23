@@ -54,7 +54,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests((configurer) -> configurer
                         .requestMatchers(HttpMethod.POST,
-                                "/auth/signup",
+                                "/auth/join",
                                 "/auth/login",
                                 "/auth/reissue").anonymous()
                         .requestMatchers(HttpMethod.GET,

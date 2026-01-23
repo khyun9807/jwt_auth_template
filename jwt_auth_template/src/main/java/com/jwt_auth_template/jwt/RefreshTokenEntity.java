@@ -5,17 +5,16 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
 @Getter
 @Setter
-public class RefreshToken {
+public class RefreshTokenEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="refresh_token_id")
+    @Column(name="refresh_token_entity_id")
     @Setter(AccessLevel.NONE)
     private Long id;
 
@@ -28,12 +27,12 @@ public class RefreshToken {
     @Column(nullable = false)
     private Date expiresAt;
 
-    public static RefreshToken createRefreshToken(
+    public static RefreshTokenEntity createRefreshToken(
             String memberIdentifier,
             String refreshToken,
             Date expiresAt
     ) {
-        RefreshToken token = new RefreshToken();
+        RefreshTokenEntity token = new RefreshTokenEntity();
         token.setMemberIdentifier(memberIdentifier);
         token.setRefreshToken(refreshToken);
         token.setExpiresAt(expiresAt);

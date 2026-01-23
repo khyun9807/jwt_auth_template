@@ -5,9 +5,17 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
+
 public interface MemberRepository extends JpaRepository<Member, Long> {
-    @Query("update Member m set m.isActive = :active where m.id = :id")
+    @Query("update Member m set m.active = :active where m.id = :id")
     @Modifying
     int updateActiveById(boolean active, Long id);
+
+    Optional<Member> findByEmailAndActive(String email, boolean active);
+
+    Optional<Member> findByOauthIdAndActive(String oauthId, boolean active);
+
+    Optional<Member> findByOauthIdAndNameAndAuthType(String oauthId, String name, AuthType authType);
 }
 

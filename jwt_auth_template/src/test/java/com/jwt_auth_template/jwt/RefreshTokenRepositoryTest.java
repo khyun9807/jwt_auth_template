@@ -6,12 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.DateTimeException;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
@@ -22,20 +18,20 @@ class RefreshTokenRepositoryTest {
 
     @Test
     void setAndGetRefreshToken() {
-        RefreshToken refreshToken = RefreshToken.createRefreshToken(
+        RefreshTokenEntity refreshTokenEntity = RefreshTokenEntity.createRefreshToken(
                 "323",
                 "afsdasdf",
                 new Date()
         );
-        refreshTokenRepository.save(refreshToken);
+        refreshTokenRepository.save(refreshTokenEntity);
 
-        Optional<RefreshToken> findRefreshToken =
+        Optional<RefreshTokenEntity> findRefreshToken =
                 refreshTokenRepository
-                        .findById(refreshToken.getId());
+                        .findById(refreshTokenEntity.getId());
 
         Assertions.assertThat(findRefreshToken).isPresent();
         Assertions.assertThat(findRefreshToken.get())
-                .isEqualTo(refreshToken);
+                .isEqualTo(refreshTokenEntity);
     }
 
 }

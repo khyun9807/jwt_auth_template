@@ -1,4 +1,4 @@
-package com.jwt_auth_template.security.jwt;
+package com.jwt_auth_template.jwt;
 
 public enum JwtType {
     REFRESH,ACCESS

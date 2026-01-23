@@ -17,7 +17,7 @@ public class Member {
     private Long id;
 
     @Column(nullable = false)
-    private boolean isActive;
+    private boolean active;
 
     @Column(nullable = false)
     private String name;
@@ -42,6 +42,7 @@ public class Member {
             String name,
             MemberRole memberRole,
             AuthType authType,
+            String oauthId,
             String password
     ) {
         Member member = new Member();
@@ -49,6 +50,7 @@ public class Member {
         member.setName(name);
         member.setMemberRole(memberRole);
         member.setAuthType(authType);
+        member.setOauthId(oauthId);
         member.setPassword(password);
         return member;
     }
