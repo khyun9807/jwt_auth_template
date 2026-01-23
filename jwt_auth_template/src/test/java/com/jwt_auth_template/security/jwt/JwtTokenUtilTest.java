@@ -1,5 +1,7 @@
 package com.jwt_auth_template.security.jwt;
 
+import com.jwt_auth_template.jwt.JwtTokenUtil;
+import com.jwt_auth_template.jwt.JwtType;
 import com.jwt_auth_template.jwt.RefreshToken;
 import com.jwt_auth_template.jwt.RefreshTokenRepository;
 import com.jwt_auth_template.security.exception.JwtTokenException;
@@ -7,16 +9,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 

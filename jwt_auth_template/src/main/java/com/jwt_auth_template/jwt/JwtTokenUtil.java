@@ -1,7 +1,5 @@
-package com.jwt_auth_template.security.jwt;
+package com.jwt_auth_template.jwt;
 
-import com.jwt_auth_template.jwt.RefreshToken;
-import com.jwt_auth_template.jwt.RefreshTokenRepository;
 import com.jwt_auth_template.security.exception.JwtTokenException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;

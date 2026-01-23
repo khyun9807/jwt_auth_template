@@ -1,4 +1,4 @@
-package com.jwt_auth_template.security.jwt;
+package com.jwt_auth_template.jwt;
 
 import lombok.AccessLevel;
 import lombok.Getter;
