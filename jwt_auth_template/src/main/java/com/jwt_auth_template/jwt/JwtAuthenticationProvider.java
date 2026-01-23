@@ -21,14 +21,14 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
     public @Nullable Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String accessToken = (String) authentication.getCredentials();
 
-        if(jwtTokenUtil.getJwtType(accessToken)!=JwtType.ACCESS){
+        if (jwtTokenUtil.getJwtType(accessToken) != JwtType.ACCESS) {
             throw new JwtTokenException("Invalid token type");
         }
 
         String memberIdentifier = jwtTokenUtil.getMemberIdentifier(accessToken);
         UserDetails userDetails = userDetailsService.loadUserByUsername(memberIdentifier);
 
-        return new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
+        return UsernamePasswordAuthenticationToken.authenticated(userDetails, null, userDetails.getAuthorities());
     }
 
     @Override
