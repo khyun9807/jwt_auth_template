@@ -1,5 +1,7 @@
 package com.jwt_auth_template.security;
 
+import com.jwt_auth_template.exception.CustomAccessDeniedHandler;
+import com.jwt_auth_template.exception.CustomAuthenticationEntryPoint;
 import com.jwt_auth_template.jwt.JwtAuthenticationFilter;
 import com.jwt_auth_template.jwt.JwtAuthenticationProvider;
 import com.jwt_auth_template.jwt.JwtTokenUtil;
@@ -27,6 +29,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +41,8 @@ import java.util.List;
 public class SecurityConfig {
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
     private final JwtTokenUtil jwtTokenUtil;
+    private final ObjectMapper objectMapper;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     private RequestMatcher permitAllRequestMatcher;
     private RequestMatcher authenticatedRequestMatcher;
@@ -80,7 +85,8 @@ public class SecurityConfig {
         return new JwtAuthenticationFilter(
                 skipEndPoints,
                 jwtTokenUtil,
-                authenticationManager()
+                authenticationManager(),
+                customAuthenticationEntryPoint
         );
     }
 
@@ -110,8 +116,13 @@ public class SecurityConfig {
                                 .anyRequest().authenticated()
                 )
 
-                //.addFilterAt(jwtAuthenticationFilter(),UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(jwtAuthenticationFilter(), LogoutFilter.class)
+
+                .exceptionHandling(
+                        configurer->configurer
+                                .authenticationEntryPoint(customAuthenticationEntryPoint)
+                                .accessDeniedHandler(new CustomAccessDeniedHandler(objectMapper))
+                )
 
                 .build();
     }

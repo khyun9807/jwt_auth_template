@@ -4,7 +4,7 @@ import com.jwt_auth_template.jwt.JwtTokenUtil;
 import com.jwt_auth_template.jwt.JwtType;
 import com.jwt_auth_template.jwt.RefreshTokenEntity;
 import com.jwt_auth_template.jwt.RefreshTokenRepository;
-import com.jwt_auth_template.security.exception.JwtTokenException;
+import com.jwt_auth_template.exception.JwtValidAuthenticationException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -84,7 +84,7 @@ class JwtTokenUtilTest {
 
         // when / then
         Assertions.assertThatThrownBy(() -> jwtTokenUtil.getMemberIdentifier(token))
-                .isInstanceOf(JwtTokenException.class)
+                .isInstanceOf(JwtValidAuthenticationException.class)
                 .hasMessage("Token has expired");
     }
 
@@ -94,7 +94,7 @@ class JwtTokenUtilTest {
         String tampered = token.substring(0, token.length() - 1) + "x";
 
         Assertions.assertThatThrownBy(() -> jwtTokenUtil.getMemberIdentifier(tampered))
-                .isInstanceOf(JwtTokenException.class)
+                .isInstanceOf(JwtValidAuthenticationException.class)
                 .hasMessage("Token signature exception");
     }
 
@@ -104,7 +104,7 @@ class JwtTokenUtilTest {
         String malformed = "this-is-not-a-jwt";
 
         Assertions.assertThatThrownBy(() -> jwtTokenUtil.getMemberIdentifier(malformed))
-                .isInstanceOf(JwtTokenException.class)
+                .isInstanceOf(JwtValidAuthenticationException.class)
                 // 네 코드에선 MalformedJwtException -> "Token is invalid"
                 .hasMessage("Token is invalid");
     }
@@ -112,7 +112,7 @@ class JwtTokenUtilTest {
     @Test
     void null_토큰이면_invalid_예외가_난다() {
         Assertions.assertThatThrownBy(() -> jwtTokenUtil.getMemberIdentifier(null))
-                .isInstanceOf(JwtTokenException.class)
+                .isInstanceOf(JwtValidAuthenticationException.class)
                 .hasMessage("Invalid JWT token");
     }
 

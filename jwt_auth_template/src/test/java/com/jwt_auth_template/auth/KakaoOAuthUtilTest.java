@@ -1,7 +1,7 @@
 package com.jwt_auth_template.auth;
 
 import com.jwt_auth_template.auth.dto.OAuthMemberInfo;
-import com.jwt_auth_template.auth.exception.OAuthException;
+import com.jwt_auth_template.exception.OAuthException;
 import com.jwt_auth_template.member.AuthType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,7 @@
 package com.jwt_auth_template.jwt;
 
-import com.jwt_auth_template.security.exception.JwtTokenException;
+import com.jwt_auth_template.exception.ErrorCode;
+import com.jwt_auth_template.exception.JwtValidAuthenticationException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.annotation.PostConstruct;
@@ -9,7 +10,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
@@ -110,15 +110,10 @@ public class JwtTokenUtil {
                     .parseSignedClaims(jwtToken)
                     .getPayload();
         } catch (ExpiredJwtException e) {
-            throw new JwtTokenException("Token has expired");
-        } catch (UnsupportedJwtException e) {
-            throw new JwtTokenException("Unsupported token");
-        } catch (SignatureException e) {
-            throw new JwtTokenException("Token signature exception");
-        } catch (MalformedJwtException e) {
-            throw new JwtTokenException("Token is invalid");
-        } catch (IllegalArgumentException e) {
-            throw new JwtTokenException("Invalid JWT token");
+            throw new JwtValidAuthenticationException(ErrorCode.JWT_EXPIRED);
+        } catch (UnsupportedJwtException|SignatureException|
+                 MalformedJwtException|IllegalArgumentException e) {
+            throw new JwtValidAuthenticationException(ErrorCode.JWT_ERROR);
         }
     }
 
@@ -131,15 +126,10 @@ public class JwtTokenUtil {
                     .getHeader().getType()
             );
         } catch (ExpiredJwtException e) {
-            throw new JwtTokenException("Token has expired");
-        } catch (UnsupportedJwtException e) {
-            throw new JwtTokenException("Unsupported token");
-        } catch (SignatureException e) {
-            throw new JwtTokenException("Token signature exception");
-        } catch (MalformedJwtException e) {
-            throw new JwtTokenException("Token is invalid");
-        } catch (IllegalArgumentException e) {
-            throw new JwtTokenException("Invalid JWT token");
+            throw new JwtValidAuthenticationException(ErrorCode.JWT_EXPIRED);
+        } catch (UnsupportedJwtException|SignatureException|
+                 MalformedJwtException|IllegalArgumentException e) {
+            throw new JwtValidAuthenticationException(ErrorCode.JWT_ERROR);
         }
     }
 }

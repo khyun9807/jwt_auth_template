@@ -1,6 +1,7 @@
 package com.jwt_auth_template.jwt;
 
-import com.jwt_auth_template.security.exception.JwtTokenException;
+import com.jwt_auth_template.exception.ErrorCode;
+import com.jwt_auth_template.exception.JwtValidAuthenticationException;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -22,7 +23,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
         String accessToken = (String) authentication.getCredentials();
 
         if (jwtTokenUtil.getJwtType(accessToken) != JwtType.ACCESS) {
-            throw new JwtTokenException("Invalid token type");
+            throw new JwtValidAuthenticationException(ErrorCode.JWT_ERROR);
         }
 
         String memberIdentifier = jwtTokenUtil.getMemberIdentifier(accessToken);

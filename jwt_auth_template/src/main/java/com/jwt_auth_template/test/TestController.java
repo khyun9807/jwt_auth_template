@@ -32,7 +32,7 @@ public class TestController {
     ) {
         System.out.println("principal.getName() = " + principal.getName());
         System.out.println("userDetails.username() = " + userDetails.getUsername());
-        System.out.println("userDetails.password() = " + userDetails.getUsername());
+        System.out.println("userDetails.password() = " + userDetails.getPassword());
         System.out.println("userDetails.getAuthorities() = " + userDetails.getAuthorities());
         
         return new MeResponseDto(

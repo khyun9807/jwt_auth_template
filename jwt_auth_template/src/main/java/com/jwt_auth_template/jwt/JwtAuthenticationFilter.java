@@ -1,5 +1,6 @@
 package com.jwt_auth_template.jwt;
 
+import com.jwt_auth_template.exception.CustomAuthenticationEntryPoint;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -19,6 +21,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final RequestMatcher skipRequestMatcher;
     private final JwtTokenUtil jwtTokenUtil;
     private final AuthenticationManager authenticationManager;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
@@ -40,14 +43,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        Authentication requestAuth =
-                UsernamePasswordAuthenticationToken.unauthenticated(null, accessToken);
+        try{
+            Authentication requestAuth =
+                    UsernamePasswordAuthenticationToken.unauthenticated(null, accessToken);
 
-        Authentication authenticated =
-                authenticationManager.authenticate(requestAuth);
-
-        SecurityContextHolder.getContext().setAuthentication(authenticated);
-
-        filterChain.doFilter(request, response);
+            Authentication authenticated =
+                    authenticationManager.authenticate(requestAuth);
+            SecurityContextHolder.getContext().setAuthentication(authenticated);
+            filterChain.doFilter(request, response);
+        }
+        catch(AuthenticationException e){
+            SecurityContextHolder.clearContext();
+            customAuthenticationEntryPoint.commence(request, response, e);
+        }
     }
 }

@@ -1,0 +1,31 @@
+package com.jwt_auth_template.exception;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
+
+@Getter
+@AllArgsConstructor
+public enum ErrorCode {
+    //GENERAL
+    BAD_REQUEST("GEN-001", HttpStatus.BAD_REQUEST, "Bad Request"),
+    NOT_FOUND("GEN-003", HttpStatus.NOT_FOUND, "Not Found"),
+    CONFLICT("GEN-004", HttpStatus.CONFLICT, "Conflict"),
+    INTERNAL_SERVER_ERROR("GEN-005", HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error"),
+
+    //AUTHENTICATE & SECURITY
+    JWT_ERROR("JWT_001", HttpStatus.UNAUTHORIZED, "JWT General Error"),
+    JWT_EXPIRED("JWT_002", HttpStatus.UNAUTHORIZED, "JWT Expired"),
+
+    UNAUTHENTICATED("SEC-001", HttpStatus.UNAUTHORIZED, "Unauthenticated"),
+    UNAUTHORIZED("SEC-002", HttpStatus.FORBIDDEN, "Unauthorized"),
+    MEMBER_DUPLICATE("SEC-003", HttpStatus.INTERNAL_SERVER_ERROR, "Duplicate Member"),
+    MEMBER_NOTFOUND("SEC-004", HttpStatus.INTERNAL_SERVER_ERROR, "Member Not Found"),
+
+    OAUTH_RESOURCE_ERROR("OAUTH-001", HttpStatus.SERVICE_UNAVAILABLE, "OAuth Resource Unavailable");
+
+
+    private final String code;
+    private final HttpStatus status;
+    private final String message;
+}
