@@ -1,6 +1,8 @@
 package com.jwt_auth_template.member;
 
 import com.jwt_auth_template.auth.dto.OAuthMemberInfo;
+import com.jwt_auth_template.exception.ErrorCode;
+import com.jwt_auth_template.exception.MemberException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,16 +29,16 @@ public class MemberService {
         };
 
         if (findMember.isPresent()) {
-            throw new MemberException("member already exists");
+            throw new MemberException(ErrorCode.MEMBER_DUPLICATE);
         }
     }
 
     public Member getActiveMember(Long id) {
         Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new MemberException("member not found with id: " + id));
+                .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOTFOUND));
 
         if (!member.isActive()) {
-            throw new MemberException("member inactivated");
+            throw new MemberException(ErrorCode.MEMBER_NOTFOUND);
         }
         return member;
     }
@@ -48,10 +50,10 @@ public class MemberService {
                                 oAuthMemberInfo.getName(),
                                 oAuthMemberInfo.getAuthType()
                         )
-                        .orElseThrow(() -> new MemberException("oauth member not found"));
+                        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOTFOUND));
 
         if (!member.isActive()) {
-            throw new MemberException("oauth member inactivated");
+            throw new MemberException(ErrorCode.MEMBER_NOTFOUND);
         }
         return member;
     }

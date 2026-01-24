@@ -2,7 +2,8 @@ package com.jwt_auth_template.auth;
 
 import com.jwt_auth_template.auth.dto.JoinWithKakaoRequestDto;
 import com.jwt_auth_template.auth.dto.OAuthMemberInfo;
-import com.jwt_auth_template.auth.exception.OAuthException;
+import com.jwt_auth_template.exception.ErrorCode;
+import com.jwt_auth_template.exception.OAuthException;
 import com.jwt_auth_template.jwt.JwtTokenUtil;
 import com.jwt_auth_template.jwt.JwtType;
 import com.jwt_auth_template.jwt.RefreshTokenEntity;
@@ -67,7 +68,7 @@ public class AuthService {
         };
 
         if(oauthMemberInfo==null) {
-            throw new OAuthException("cannot extract member info from oauth token");
+            throw new OAuthException(ErrorCode.OAUTH_RESOURCE_ERROR);
         }
 
         return memberService.getActiveOAuthMember(oauthMemberInfo);

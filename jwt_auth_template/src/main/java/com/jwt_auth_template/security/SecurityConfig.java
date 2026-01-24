@@ -1,5 +1,13 @@
 package com.jwt_auth_template.security;
 
+import com.jwt_auth_template.exception.CustomAccessDeniedHandler;
+import com.jwt_auth_template.exception.CustomAuthenticationEntryPoint;
+import com.jwt_auth_template.jwt.JwtAuthenticationFilter;
+import com.jwt_auth_template.jwt.JwtAuthenticationProvider;
+import com.jwt_auth_template.jwt.JwtTokenUtil;
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -13,28 +21,74 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import tools.jackson.databind.ObjectMapper;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+    private final JwtAuthenticationProvider jwtAuthenticationProvider;
+    private final JwtTokenUtil jwtTokenUtil;
+    private final ObjectMapper objectMapper;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+
+    private RequestMatcher permitAllRequestMatcher;
+    private RequestMatcher authenticatedRequestMatcher;
+    private RequestMatcher adminRequestMatcher;
+
+    @PostConstruct
+    void init() {
+        var requestMatcher =
+                PathPatternRequestMatcher.withDefaults().basePath("/");
+        permitAllRequestMatcher = new OrRequestMatcher(
+                requestMatcher.matcher(HttpMethod.GET, "/swagger-ui/**"),
+                requestMatcher.matcher(HttpMethod.GET, "/v3/api-docs/**"),
+                requestMatcher.matcher(HttpMethod.GET, "/favicon.ico"),
+                requestMatcher.matcher("/auth/**")
+        );
+        authenticatedRequestMatcher = new OrRequestMatcher(
+                requestMatcher.matcher(HttpMethod.GET, "/me")
+        );
+        adminRequestMatcher = new OrRequestMatcher(
+                requestMatcher.matcher(HttpMethod.GET, "/admin/**")
+        );
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    /*@Bean
+    @Bean
     public AuthenticationManager authenticationManager() {
-        return new ProviderManager(Arrays.asList(
-                //아직 provider 만든거 없음
-        ));
-    }*/
+        return new ProviderManager(
+                jwtAuthenticationProvider
+        );
+    }
 
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        RequestMatcher skipEndPoints =
+                permitAllRequestMatcher;
+        return new JwtAuthenticationFilter(
+                skipEndPoints,
+                jwtTokenUtil,
+                authenticationManager(),
+                customAuthenticationEntryPoint
+        );
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -46,24 +100,28 @@ public class SecurityConfig {
                 .rememberMe(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .sessionManagement(
-                        a->a.sessionCreationPolicy(
+                        a -> a.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS
                         )
                 )
 
+                .authorizeHttpRequests(
+                        configurer -> configurer
+                                .requestMatchers(permitAllRequestMatcher)
+                                .permitAll()
+                                .requestMatchers(authenticatedRequestMatcher)
+                                .permitAll()
+                                .requestMatchers(adminRequestMatcher)
+                                .hasRole("ADMIN")
+                                .anyRequest().authenticated()
+                )
 
-                .authorizeHttpRequests((configurer) -> configurer
-                        .requestMatchers(HttpMethod.POST,
-                                "/auth/join",
-                                "/auth/login",
-                                "/auth/reissue").anonymous()
-                        .requestMatchers(HttpMethod.GET,
-                                "/auth/me").authenticated()
-                        .requestMatchers(HttpMethod.GET,
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/favicon.ico").permitAll()
-                        .anyRequest().permitAll()
+                .addFilterAfter(jwtAuthenticationFilter(), LogoutFilter.class)
+
+                .exceptionHandling(
+                        configurer->configurer
+                                .authenticationEntryPoint(customAuthenticationEntryPoint)
+                                .accessDeniedHandler(new CustomAccessDeniedHandler(objectMapper))
                 )
 
                 .build();
