@@ -56,18 +56,12 @@ public class JwtTokenUtil {
     }
 
     public RefreshTokenEntity generateRefreshTokenEntity(
-            String memberIdentifier, String refreshToken, Date issuedAt
+            String memberIdentifier, String refreshToken
     ) {
-        Date expDate = new Date(
-                issuedAt.getTime() +
-                        jwtProperties.getRefreshTokenTime()
-        );
 
         return RefreshTokenEntity.createRefreshToken(
                 memberIdentifier,
-                refreshToken,
-                issuedAt,
-                expDate
+                refreshToken
         );
     }
 
@@ -90,10 +84,11 @@ public class JwtTokenUtil {
     }
 
     public void generateCookieRefreshToken(RefreshTokenEntity refreshTokenEntity, HttpServletResponse response) {
-        Cookie cookie = new Cookie("refreshToken", refreshTokenEntity.getRefreshToken());
+        String refreshToken = refreshTokenEntity.getRefreshToken();
+        Cookie cookie = new Cookie("refreshToken", refreshToken);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
-        int age = (int) ((new Date()).getTime() - refreshTokenEntity.getExpiresAt().getTime() / 1000);
+        int age = (int) ((new Date()).getTime() - getExpiresAt(refreshToken).getTime() / 1000);
         cookie.setMaxAge(age);
         response.addCookie(cookie);
     }
@@ -126,6 +121,16 @@ public class JwtTokenUtil {
     public String getMemberIdentifier(String jwtToken) {
         return getClaimsFromJwtToken(jwtToken)
                 .getSubject();
+    }
+
+    public Date getIssuedAt(String jwtToken) {
+        return getClaimsFromJwtToken(jwtToken)
+                .getIssuedAt();
+    }
+
+    public Date getExpiresAt(String jwtToken) {
+        return getClaimsFromJwtToken(jwtToken)
+                .getExpiration();
     }
 
     private Claims getClaimsFromJwtToken(String jwtToken) {
