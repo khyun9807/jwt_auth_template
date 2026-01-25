@@ -18,7 +18,7 @@ public class RefreshTokenEntity {
     @Setter(AccessLevel.NONE)
     private Long id;
 
-    @Column(nullable = false,unique = true)
+    @Column(nullable = false,unique = true,updatable = false)
     private String memberIdentifier;
 
     @Column(nullable = false)

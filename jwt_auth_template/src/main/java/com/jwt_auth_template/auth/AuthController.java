@@ -69,7 +69,7 @@ public class AuthController {
             @CookieValue(required = false) String refreshToken,
             HttpServletResponse response
     ) {
-        authService.clearRefreshTokenAndRefreshTokenEntity(refreshToken, response);
+        authService.clearRefreshTokenAndEntity(refreshToken, response);
 
         return ResponseEntity.ok(ApiResponse.ok("logout success"));
     }

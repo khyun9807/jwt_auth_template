@@ -9,7 +9,6 @@ import com.jwt_auth_template.exception.ReissueException;
 import com.jwt_auth_template.jwt.JwtTokenUtil;
 import com.jwt_auth_template.jwt.JwtType;
 import com.jwt_auth_template.jwt.RefreshTokenEntity;
-import com.jwt_auth_template.jwt.RefreshTokenRepository;
 import com.jwt_auth_template.member.AuthType;
 import com.jwt_auth_template.member.Member;
 import com.jwt_auth_template.member.MemberRole;
@@ -28,7 +27,6 @@ public class AuthService {
     private final MemberService memberService;
     private final KakaoOAuthUtil kakaoOAuthUtil;
     private final JwtTokenUtil jwtTokenUtil;
-    private final RefreshTokenRepository refreshTokenRepository;
 
     public Member joinWithKakao(JoinWithKakaoRequestDto joinWithKakaoRequestDto) {
 
@@ -51,7 +49,7 @@ public class AuthService {
         String refreshToken = jwtTokenUtil.generateJwtToken(JwtType.REFRESH, issuedAt, memberIdentifier);
 
         RefreshTokenEntity refreshTokenEntity =
-                jwtTokenUtil.generateRefreshTokenEntity(memberIdentifier,refreshToken,issuedAt);
+                jwtTokenUtil.generateRefreshTokenEntity(memberIdentifier, refreshToken, issuedAt);
 
         jwtTokenUtil.upsertRefreshTokenEntity(refreshTokenEntity);
         jwtTokenUtil.generateCookieRefreshToken(refreshTokenEntity, response);
@@ -61,44 +59,48 @@ public class AuthService {
 
     public Member findMemberWithOauthToken(String oauthToken, AuthType authType) {
 
-        OAuthMemberInfo oauthMemberInfo=switch (authType){
+        OAuthMemberInfo oauthMemberInfo = switch (authType) {
             case AuthType.KAKAO -> kakaoOAuthUtil.getMemberInfoFromOAuthToken(oauthToken);
             case AuthType.NAVER -> null;
             default -> null;
         };
 
-        if(oauthMemberInfo==null) {
+        if (oauthMemberInfo == null) {
             throw new OAuthException(ErrorCode.OAUTH_RESOURCE_ERROR);
         }
 
         return memberService.getActiveOAuthMember(oauthMemberInfo);
     }
 
-    public String reissueAccessToken(String refreshToken,HttpServletResponse response){
-        try{
+    public String reissueAccessToken(String refreshToken, HttpServletResponse response) {
+
+        RefreshTokenEntity refreshTokenEntity = jwtTokenUtil.getRefreshTokenEntity(refreshToken);
+        try {
+            //검증과 식별자 추출
             String memberIdentifier = jwtTokenUtil.getMemberIdentifier(refreshToken);
 
-            RefreshTokenEntity refreshTokenEntity = refreshTokenRepository.findByRefreshToken(refreshToken);
+            return enrollNewAuthTokens(memberIdentifier, response, refreshTokenEntity.getIssuedAt());
+        } catch (JwtValidAuthenticationException e) {
 
-            return enrollNewAuthTokens(memberIdentifier,response,refreshTokenEntity.getIssuedAt());
-        }
-        catch(JwtValidAuthenticationException e){
-            switch(e.getErrorCode()){
-                case ErrorCode.JWT_ERROR -> {//높은 확률로 replay attack
-                    
+            switch (e.getErrorCode()) {
+                case ErrorCode.JWT_ERROR -> throw new ReissueException(ErrorCode.JWT_REISSUE_ERROR);
+                case ErrorCode.JWT_EXPIRED -> {//replay attack 혹은 리프레쉬 토큰 만료
+                    //발급된 리프레시 토큰 만료시키기
+                    jwtTokenUtil.deleteAllRefreshTokenEntity(refreshTokenEntity.getMemberIdentifier());
 
-                    throw new ReissueException(ErrorCode.JWT_REISSUE_ERROR);
+                    throw new ReissueException(ErrorCode.JWT_REISSUE_EXPIRED);
                 }
-                case ErrorCode.JWT_EXPIRED -> throw new ReissueException(ErrorCode.JWT_REISSUE_EXPIRED);
                 default -> throw new ReissueException(ErrorCode.REISSUE_ERROR);
             }
+
         }
     }
 
-    public void clearRefreshTokenAndRefreshTokenEntity(String refreshToken, HttpServletResponse response) {
-        if(refreshToken!=null) {
+    public void clearRefreshTokenAndEntity(String refreshToken, HttpServletResponse response) {
+        if (refreshToken != null) {
             jwtTokenUtil.eraseCookieRefreshToken(response);
-            jwtTokenUtil.deleteRefreshTokenEntity(refreshToken);
+            RefreshTokenEntity refreshTokenEntity = jwtTokenUtil.getRefreshTokenEntity(refreshToken);
+            jwtTokenUtil.deleteAllRefreshTokenEntity(refreshTokenEntity.getMemberIdentifier());
         }
     }
 }

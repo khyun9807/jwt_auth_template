@@ -9,7 +9,5 @@ public interface RefreshTokenRepository
 
     int deleteByMemberIdentifier(String memberIdentifier);
 
-    int deleteByRefreshToken(String refreshToken);
-
     RefreshTokenEntity findByRefreshToken(String refreshToken);
 }

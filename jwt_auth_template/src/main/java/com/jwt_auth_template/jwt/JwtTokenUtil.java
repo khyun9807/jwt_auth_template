@@ -67,17 +67,21 @@ public class JwtTokenUtil {
         );
     }
 
+
     //@Transactional
     public void upsertRefreshTokenEntity(RefreshTokenEntity refreshTokenEntity) {
-        refreshTokenRepository.deleteByMemberIdentifier(refreshTokenEntity.getMemberIdentifier());
-        refreshTokenRepository.flush();
+        deleteAllRefreshTokenEntity(refreshTokenEntity.getMemberIdentifier());
         refreshTokenRepository.save(refreshTokenEntity);
     }
 
-    public void deleteRefreshTokenEntity(String refreshToken) {
-        refreshTokenRepository.deleteByRefreshToken(refreshToken);
+    public void deleteAllRefreshTokenEntity(String memberIdentifier) {
+        refreshTokenRepository.deleteByMemberIdentifier(memberIdentifier);
+        refreshTokenRepository.flush();
     }
 
+    public RefreshTokenEntity getRefreshTokenEntity(String refreshToken) {
+        return refreshTokenRepository.findByRefreshToken(refreshToken);
+    }
 
     public void generateCookieRefreshToken(RefreshTokenEntity refreshTokenEntity, HttpServletResponse response) {
         Cookie cookie = new Cookie("refreshToken", refreshTokenEntity.getRefreshToken());
@@ -95,6 +99,8 @@ public class JwtTokenUtil {
         cookie.setMaxAge(0);
         response.addCookie(cookie);
     }
+
+
 
     public String extractJwtTokenFromRequest(HttpServletRequest request) {
         String headerValue = request.getHeader("Authorization");
