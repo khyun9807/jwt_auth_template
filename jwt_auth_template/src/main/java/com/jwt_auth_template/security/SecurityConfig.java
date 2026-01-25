@@ -52,6 +52,7 @@ public class SecurityConfig {
     void init() {
         var requestMatcher =
                 PathPatternRequestMatcher.withDefaults().basePath("/");
+
         permitAllRequestMatcher = new OrRequestMatcher(
                 requestMatcher.matcher(HttpMethod.GET, "/swagger-ui/**"),
                 requestMatcher.matcher(HttpMethod.GET, "/v3/api-docs/**"),

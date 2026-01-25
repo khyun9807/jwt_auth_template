@@ -25,16 +25,21 @@ public class RefreshTokenEntity {
     private String refreshToken;
 
     @Column(nullable = false)
+    private Date issuedAt;
+
+    @Column(nullable = false)
     private Date expiresAt;
 
     public static RefreshTokenEntity createRefreshToken(
             String memberIdentifier,
             String refreshToken,
+            Date issuedAt,
             Date expiresAt
     ) {
         RefreshTokenEntity token = new RefreshTokenEntity();
         token.setMemberIdentifier(memberIdentifier);
         token.setRefreshToken(refreshToken);
+        token.setIssuedAt(issuedAt);
         token.setExpiresAt(expiresAt);
         return token;
     }

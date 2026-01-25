@@ -16,9 +16,12 @@ class RefreshTokenRepositoryTest {
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
 
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
+
     @Test
     void setAndGetRefreshToken() {
-        RefreshTokenEntity refreshTokenEntity = RefreshTokenEntity.createRefreshToken(
+        RefreshTokenEntity refreshTokenEntity = jwtTokenUtil.generateRefreshTokenEntity(
                 "323",
                 "afsdasdf",
                 new Date()

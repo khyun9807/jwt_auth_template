@@ -52,32 +52,47 @@ public class JwtTokenUtil {
     }
 
     public RefreshTokenEntity generateRefreshTokenEntity(
-            String memberIdentifier, String token, Date now
+            String memberIdentifier, String refreshToken, Date issuedAt
     ) {
         Date expDate = new Date(
-                now.getTime() +
-                        jwtProperties.getRefreshTokenTime());
+                issuedAt.getTime() +
+                        jwtProperties.getRefreshTokenTime()
+        );
 
         return RefreshTokenEntity.createRefreshToken(
                 memberIdentifier,
-                token,
+                refreshToken,
+                issuedAt,
                 expDate
         );
     }
 
     //@Transactional
-    public void saveRefreshTokenEntity(RefreshTokenEntity refreshTokenEntity) {
-        //refreshTokenRepository.deleteByMemberIdentifier(refreshTokenEntity.getMemberIdentifier());
-        //refreshTokenRepository.flush();
+    public void upsertRefreshTokenEntity(RefreshTokenEntity refreshTokenEntity) {
+        refreshTokenRepository.deleteByMemberIdentifier(refreshTokenEntity.getMemberIdentifier());
+        refreshTokenRepository.flush();
         refreshTokenRepository.save(refreshTokenEntity);
     }
 
-    public void setCookieRefreshToken(RefreshTokenEntity refreshTokenEntity, HttpServletResponse response) {
+    public void deleteRefreshTokenEntity(String refreshToken) {
+        refreshTokenRepository.deleteByRefreshToken(refreshToken);
+    }
+
+
+    public void generateCookieRefreshToken(RefreshTokenEntity refreshTokenEntity, HttpServletResponse response) {
         Cookie cookie = new Cookie("refreshToken", refreshTokenEntity.getRefreshToken());
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         int age = (int) ((new Date()).getTime() - refreshTokenEntity.getExpiresAt().getTime() / 1000);
         cookie.setMaxAge(age);
+        response.addCookie(cookie);
+    }
+
+    public void eraseCookieRefreshToken(HttpServletResponse response) {
+        Cookie cookie = new Cookie("refreshToken", null);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(0);
         response.addCookie(cookie);
     }
 
@@ -111,8 +126,8 @@ public class JwtTokenUtil {
                     .getPayload();
         } catch (ExpiredJwtException e) {
             throw new JwtValidAuthenticationException(ErrorCode.JWT_EXPIRED);
-        } catch (UnsupportedJwtException|SignatureException|
-                 MalformedJwtException|IllegalArgumentException e) {
+        } catch (UnsupportedJwtException | SignatureException |
+                 MalformedJwtException | IllegalArgumentException e) {
             throw new JwtValidAuthenticationException(ErrorCode.JWT_ERROR);
         }
     }
@@ -127,8 +142,8 @@ public class JwtTokenUtil {
             );
         } catch (ExpiredJwtException e) {
             throw new JwtValidAuthenticationException(ErrorCode.JWT_EXPIRED);
-        } catch (UnsupportedJwtException|SignatureException|
-                 MalformedJwtException|IllegalArgumentException e) {
+        } catch (UnsupportedJwtException | SignatureException |
+                 MalformedJwtException | IllegalArgumentException e) {
             throw new JwtValidAuthenticationException(ErrorCode.JWT_ERROR);
         }
     }
