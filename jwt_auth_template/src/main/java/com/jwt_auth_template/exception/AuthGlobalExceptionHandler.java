@@ -25,6 +25,14 @@ public class AuthGlobalExceptionHandler {
         return buildErrorResponse(exception.getErrorCode());
     }
 
+    //AuthController 내에서 발생하는 JwtValidAuthentication 에러는 토큰 리이슈 관련 에러입니다.
+    @ExceptionHandler(ReissueException.class)
+    public ResponseEntity<ApiResponse<Void>> handleReissueException(
+            final ReissueException exception
+    ) {
+        return buildErrorResponse(exception.getErrorCode());
+    }
+
 
     private ResponseEntity<ApiResponse<Void>> buildErrorResponse(ErrorCode errorCode) {
         return ResponseEntity

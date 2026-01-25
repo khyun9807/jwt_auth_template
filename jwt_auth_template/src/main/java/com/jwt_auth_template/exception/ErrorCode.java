@@ -13,9 +13,12 @@ public enum ErrorCode {
     CONFLICT("GEN-004", HttpStatus.CONFLICT, "Conflict"),
     INTERNAL_SERVER_ERROR("GEN-005", HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error"),
 
-    //AUTHENTICATE & SECURITY
+    //인증관련
     JWT_ERROR("JWT_001", HttpStatus.UNAUTHORIZED, "JWT General Error"),
     JWT_EXPIRED("JWT_002", HttpStatus.UNAUTHORIZED, "JWT Expired"),
+    JWT_REISSUE_ERROR("JWT_003", HttpStatus.INTERNAL_SERVER_ERROR, "Refresh Token General Error"),
+    JWT_REISSUE_EXPIRED("JWT_004", HttpStatus.INTERNAL_SERVER_ERROR, "Refresh Token Expired"),
+    REISSUE_ERROR("JWT_005", HttpStatus.INTERNAL_SERVER_ERROR, "Reissue General Error"),
 
     UNAUTHENTICATED("SEC-001", HttpStatus.UNAUTHORIZED, "Unauthenticated"),
     UNAUTHORIZED("SEC-002", HttpStatus.FORBIDDEN, "Unauthorized"),
@@ -23,7 +26,6 @@ public enum ErrorCode {
     MEMBER_NOTFOUND("SEC-004", HttpStatus.INTERNAL_SERVER_ERROR, "Member Not Found"),
 
     OAUTH_RESOURCE_ERROR("OAUTH-001", HttpStatus.SERVICE_UNAVAILABLE, "OAuth Resource Unavailable");
-
 
     private final String code;
     private final HttpStatus status;

@@ -1,20 +1,15 @@
 package com.jwt_auth_template.auth;
 
-import com.jwt_auth_template.auth.dto.JoinWithKakaoRequestDto;
-import com.jwt_auth_template.auth.dto.LoginSuccessResponseDto;
-import com.jwt_auth_template.auth.dto.LoginWithKakaoRequestDto;
-import com.jwt_auth_template.auth.dto.MeResponseDto;
+import com.jwt_auth_template.auth.dto.*;
+import com.jwt_auth_template.exception.ApiResponse;
 import com.jwt_auth_template.member.AuthType;
 import com.jwt_auth_template.member.Member;
-import com.jwt_auth_template.member.MemberRole;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
+import java.util.Date;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,20 +19,23 @@ public class AuthController {
 
 
     @PostMapping("/joinWithKakao")
-    public LoginSuccessResponseDto joinWithKakao(
+    public ResponseEntity<ApiResponse<LoginSuccessResponseDto>> joinWithKakao(
             @RequestBody JoinWithKakaoRequestDto joinWithKakaoRequestDto,
             HttpServletResponse response
     ) {
         Member member = authService.joinWithKakao(joinWithKakaoRequestDto);
 
         String accessToken =
-                authService.enrollAuthTokens(member.getId().toString(), response);
+                authService.enrollNewAuthTokens(member.getId().toString(), response,new Date());
 
-        return new LoginSuccessResponseDto(accessToken);
+        return ResponseEntity.ok(
+                ApiResponse.ok(new LoginSuccessResponseDto(accessToken))
+        );
     }
 
+
     @PostMapping("/loginWithKakao")
-    public LoginSuccessResponseDto login(
+    public ResponseEntity<ApiResponse<LoginSuccessResponseDto>> login(
             @RequestBody LoginWithKakaoRequestDto loginWithKakaoRequestDto,
             HttpServletResponse response
     ) {
@@ -47,10 +45,32 @@ public class AuthController {
         );
 
         String accessToken =
-                authService.enrollAuthTokens(member.getId().toString(), response);
+                authService.enrollNewAuthTokens(member.getId().toString(), response,new Date());
 
-        return new LoginSuccessResponseDto(accessToken);
+        return ResponseEntity.ok(
+                ApiResponse.ok(new LoginSuccessResponseDto(accessToken))
+        );
     }
 
+    @PostMapping("/reissue")
+    public ResponseEntity<ApiResponse<ReissueSuccessResponseDto>> reissue(
+            @CookieValue(required = false) String refreshToken,
+            HttpServletResponse response
+    ){
+        String accessToken = authService.reissueAccessToken(refreshToken, response);
 
+        return ResponseEntity.ok(
+                ApiResponse.ok(new ReissueSuccessResponseDto(accessToken))
+        );
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<String>> logout(
+            @CookieValue(required = false) String refreshToken,
+            HttpServletResponse response
+    ) {
+        authService.clearRefreshTokenAndEntity(refreshToken, response);
+
+        return ResponseEntity.ok(ApiResponse.ok("logout success"));
+    }
 }

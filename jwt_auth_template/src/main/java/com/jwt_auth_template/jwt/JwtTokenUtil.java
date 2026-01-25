@@ -10,12 +10,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -48,31 +51,45 @@ public class JwtTokenUtil {
                 .issuedAt(now)
                 .expiration(expDate)
                 .signWith(key)
+                .id(UUID.randomUUID().toString())
                 .compact();
     }
 
     public RefreshTokenEntity generateRefreshTokenEntity(
-            String memberIdentifier, String token, Date now
+            String memberIdentifier, String refreshToken, Date issuedAt
     ) {
         Date expDate = new Date(
-                now.getTime() +
-                        jwtProperties.getRefreshTokenTime());
+                issuedAt.getTime() +
+                        jwtProperties.getRefreshTokenTime()
+        );
 
         return RefreshTokenEntity.createRefreshToken(
                 memberIdentifier,
-                token,
+                refreshToken,
+                issuedAt,
                 expDate
         );
     }
 
+
     //@Transactional
-    public void saveRefreshTokenEntity(RefreshTokenEntity refreshTokenEntity) {
-        //refreshTokenRepository.deleteByMemberIdentifier(refreshTokenEntity.getMemberIdentifier());
-        //refreshTokenRepository.flush();
+    public void upsertRefreshTokenEntity(RefreshTokenEntity refreshTokenEntity) {
+        deleteAllRefreshTokenEntity(refreshTokenEntity.getMemberIdentifier());
         refreshTokenRepository.save(refreshTokenEntity);
     }
 
-    public void setCookieRefreshToken(RefreshTokenEntity refreshTokenEntity, HttpServletResponse response) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public int deleteAllRefreshTokenEntity(String memberIdentifier) {
+        int count = refreshTokenRepository.deleteByMemberIdentifier(memberIdentifier);
+        refreshTokenRepository.flush();
+        return count;
+    }
+
+    public RefreshTokenEntity getRefreshTokenEntity(String refreshToken) {
+        return refreshTokenRepository.findByRefreshToken(refreshToken);
+    }
+
+    public void generateCookieRefreshToken(RefreshTokenEntity refreshTokenEntity, HttpServletResponse response) {
         Cookie cookie = new Cookie("refreshToken", refreshTokenEntity.getRefreshToken());
         cookie.setPath("/");
         cookie.setHttpOnly(true);
@@ -80,6 +97,16 @@ public class JwtTokenUtil {
         cookie.setMaxAge(age);
         response.addCookie(cookie);
     }
+
+    public void eraseCookieRefreshToken(HttpServletResponse response) {
+        Cookie cookie = new Cookie("refreshToken", null);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+    }
+
+
 
     public String extractJwtTokenFromRequest(HttpServletRequest request) {
         String headerValue = request.getHeader("Authorization");
@@ -111,8 +138,8 @@ public class JwtTokenUtil {
                     .getPayload();
         } catch (ExpiredJwtException e) {
             throw new JwtValidAuthenticationException(ErrorCode.JWT_EXPIRED);
-        } catch (UnsupportedJwtException|SignatureException|
-                 MalformedJwtException|IllegalArgumentException e) {
+        } catch (UnsupportedJwtException | SignatureException |
+                 MalformedJwtException | IllegalArgumentException e) {
             throw new JwtValidAuthenticationException(ErrorCode.JWT_ERROR);
         }
     }
@@ -127,8 +154,8 @@ public class JwtTokenUtil {
             );
         } catch (ExpiredJwtException e) {
             throw new JwtValidAuthenticationException(ErrorCode.JWT_EXPIRED);
-        } catch (UnsupportedJwtException|SignatureException|
-                 MalformedJwtException|IllegalArgumentException e) {
+        } catch (UnsupportedJwtException | SignatureException |
+                 MalformedJwtException | IllegalArgumentException e) {
             throw new JwtValidAuthenticationException(ErrorCode.JWT_ERROR);
         }
     }
