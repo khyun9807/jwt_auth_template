@@ -33,8 +33,8 @@ public class MemberService {
         }
     }
 
-    public Member getActiveMember(Long id) {
-        Member member = memberRepository.findById(id)
+    public Member getActiveMemberByMemberIdentifier(String memberIdentifier) {
+        Member member = memberRepository.findByMemberIdentifier(memberIdentifier)
                 .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOTFOUND));
 
         if (!member.isActive()) {

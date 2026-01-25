@@ -44,7 +44,11 @@ public class AuthService {
         return memberService.save(member);
     }
 
-    public String enrollNewAuthTokens(String memberIdentifier, HttpServletResponse response, Date issuedAt) {
+    public String enrollNewAuthTokens(Member member,HttpServletResponse response) {
+        return upsertNewAuthTokens(member.getMemberIdentifier(),response,new Date());
+    }
+
+    private String upsertNewAuthTokens(String memberIdentifier, HttpServletResponse response, Date issuedAt) {
         String accessToken = jwtTokenUtil.generateJwtToken(JwtType.ACCESS, issuedAt, memberIdentifier);
         String refreshToken = jwtTokenUtil.generateJwtToken(JwtType.REFRESH, issuedAt, memberIdentifier);
 
@@ -79,7 +83,7 @@ public class AuthService {
             //검증과 식별자 추출
             String memberIdentifier = jwtTokenUtil.getMemberIdentifier(refreshToken);
 
-            return  enrollNewAuthTokens(memberIdentifier, response, refreshTokenEntity.getIssuedAt());
+            return  upsertNewAuthTokens(memberIdentifier, response, refreshTokenEntity.getIssuedAt());
         } catch (JwtValidAuthenticationException e) {
 
             switch (e.getErrorCode()) {

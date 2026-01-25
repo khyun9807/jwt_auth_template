@@ -124,7 +124,6 @@ public class JwtTokenUtil {
     }
 
     public String getMemberIdentifier(String jwtToken) {
-
         return getClaimsFromJwtToken(jwtToken)
                 .getSubject();
     }
