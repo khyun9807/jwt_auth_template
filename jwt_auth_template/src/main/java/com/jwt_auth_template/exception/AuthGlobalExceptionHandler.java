@@ -20,8 +20,8 @@ public class AuthGlobalExceptionHandler {
         return buildErrorResponse(exception.getErrorCode());
     }
 
-    @ExceptionHandler(MemberException.class)
-    public ResponseEntity<ApiResponse<Void>> handleMemberException(final MemberException exception) {
+    @ExceptionHandler(MemberAuthenticationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMemberException(final MemberAuthenticationException exception) {
         return buildErrorResponse(exception.getErrorCode());
     }
 

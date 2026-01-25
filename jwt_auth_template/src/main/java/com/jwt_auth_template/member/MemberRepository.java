@@ -8,6 +8,9 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
+
+    Optional<Member> findByMemberIdentifier(String memberIdentifier);
+
     @Query("update Member m set m.active = :active where m.id = :id")
     @Modifying
     int updateActiveById(boolean active, Long id);

@@ -5,6 +5,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Entity
 @Getter
 @Setter
@@ -15,6 +17,10 @@ public class Member {
     @Column(name = "member_id")
     @Setter(AccessLevel.NONE)
     private Long id;
+
+    @Column(nullable = false,unique = true,updatable = false)
+    @Setter(AccessLevel.PRIVATE)
+    private String memberIdentifier;
 
     @Column(nullable = false)
     private boolean active;
@@ -52,6 +58,7 @@ public class Member {
         member.setAuthType(authType);
         member.setOauthId(oauthId);
         member.setPassword(password);
+        member.setMemberIdentifier(UUID.randomUUID().toString());
         return member;
     }
 }

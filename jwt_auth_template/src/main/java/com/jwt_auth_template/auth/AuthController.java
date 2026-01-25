@@ -26,7 +26,7 @@ public class AuthController {
         Member member = authService.joinWithKakao(joinWithKakaoRequestDto);
 
         String accessToken =
-                authService.enrollNewAuthTokens(member.getId().toString(), response,new Date());
+                authService.enrollNewAuthTokens(member, response);
 
         return ResponseEntity.ok(
                 ApiResponse.ok(new LoginSuccessResponseDto(accessToken))
@@ -45,7 +45,7 @@ public class AuthController {
         );
 
         String accessToken =
-                authService.enrollNewAuthTokens(member.getId().toString(), response,new Date());
+                authService.enrollNewAuthTokens(member, response);
 
         return ResponseEntity.ok(
                 ApiResponse.ok(new LoginSuccessResponseDto(accessToken))

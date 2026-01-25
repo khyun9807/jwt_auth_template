@@ -2,7 +2,7 @@ package com.jwt_auth_template.member;
 
 import com.jwt_auth_template.auth.dto.OAuthMemberInfo;
 import com.jwt_auth_template.exception.ErrorCode;
-import com.jwt_auth_template.exception.MemberException;
+import com.jwt_auth_template.exception.MemberAuthenticationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,18 +29,8 @@ public class MemberService {
         };
 
         if (findMember.isPresent()) {
-            throw new MemberException(ErrorCode.MEMBER_DUPLICATE);
+            throw new MemberAuthenticationException(ErrorCode.MEMBER_DUPLICATE);
         }
-    }
-
-    public Member getActiveMember(Long id) {
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOTFOUND));
-
-        if (!member.isActive()) {
-            throw new MemberException(ErrorCode.MEMBER_NOTFOUND);
-        }
-        return member;
     }
 
     public Member getActiveOAuthMember(OAuthMemberInfo oAuthMemberInfo) {
@@ -50,10 +40,10 @@ public class MemberService {
                                 oAuthMemberInfo.getName(),
                                 oAuthMemberInfo.getAuthType()
                         )
-                        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOTFOUND));
+                        .orElseThrow(() -> new MemberAuthenticationException(ErrorCode.MEMBER_NOTFOUND));
 
         if (!member.isActive()) {
-            throw new MemberException(ErrorCode.MEMBER_NOTFOUND);
+            throw new MemberAuthenticationException(ErrorCode.MEMBER_NOTFOUND);
         }
         return member;
     }

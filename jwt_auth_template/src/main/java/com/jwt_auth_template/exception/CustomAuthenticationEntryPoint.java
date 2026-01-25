@@ -48,6 +48,9 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         if (ex instanceof JwtValidAuthenticationException jwtEx) {
             return jwtEx.getErrorCode();
         }
+        if(ex instanceof  MemberAuthenticationException memberEx) {
+            return memberEx.getErrorCode();
+        }
 
         // 3) 토큰이 아예 없거나(익명 접근) 등으로 발생하는 대표 케이스
         if (ex instanceof InsufficientAuthenticationException) {
