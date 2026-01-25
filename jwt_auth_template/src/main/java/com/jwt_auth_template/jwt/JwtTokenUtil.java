@@ -14,9 +14,12 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
 
@@ -27,6 +30,7 @@ public class JwtTokenUtil {
     private final RefreshTokenRepository refreshTokenRepository;
 
     private SecretKey key;
+    private SecretKey refreshSecretKey;
 
     @PostConstruct
     protected void init() {
@@ -35,12 +39,29 @@ public class JwtTokenUtil {
                         .getBytes(StandardCharsets.UTF_8),
                 Jwts.SIG.HS512.key().build().getAlgorithm()
         );
+        refreshSecretKey = new SecretKeySpec(
+                jwtProperties.getRefreshTokenSecretKey()
+                        .getBytes(StandardCharsets.UTF_8),
+                Jwts.SIG.HS512.key().build().getAlgorithm()
+        );
+    }
+
+    private String hashRefreshToken(String refreshToken){
+        try {
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(refreshSecretKey);
+            byte[] digest = mac.doFinal(refreshToken.getBytes(StandardCharsets.UTF_8));
+            return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("Failed to hash refresh token", e);
+        }
     }
 
     public String generateJwtToken(JwtType jwtType, Date now, String memberIdentifier) {
         Date expDate = new Date(
                 now.getTime() +
-                        (jwtType == JwtType.REFRESH ? jwtProperties.getRefreshTokenTime() : jwtProperties.getAccessTokenTime())
+                        (jwtType == JwtType.REFRESH ?
+                                jwtProperties.getRefreshTokenTime() : jwtProperties.getAccessTokenTime())
         );
 
         return Jwts.builder()
@@ -55,16 +76,17 @@ public class JwtTokenUtil {
                 .compact();
     }
 
+
+
     public RefreshTokenEntity generateRefreshTokenEntity(
             String memberIdentifier, String refreshToken
     ) {
 
         return RefreshTokenEntity.createRefreshToken(
                 memberIdentifier,
-                refreshToken
+                hashRefreshToken(refreshToken)
         );
     }
-
 
     //@Transactional
     public void upsertRefreshTokenEntity(RefreshTokenEntity refreshTokenEntity) {
@@ -80,11 +102,12 @@ public class JwtTokenUtil {
     }
 
     public RefreshTokenEntity getRefreshTokenEntity(String refreshToken) {
-        return refreshTokenRepository.findByRefreshToken(refreshToken);
+        return refreshTokenRepository.findByHashedRefreshToken(hashRefreshToken(refreshToken));
     }
 
-    public void generateCookieRefreshToken(RefreshTokenEntity refreshTokenEntity, HttpServletResponse response) {
-        String refreshToken = refreshTokenEntity.getRefreshToken();
+
+
+    public void generateCookieRefreshToken(String refreshToken, HttpServletResponse response) {
         Cookie cookie = new Cookie("refreshToken", refreshToken);
         cookie.setPath("/");
         cookie.setHttpOnly(true);

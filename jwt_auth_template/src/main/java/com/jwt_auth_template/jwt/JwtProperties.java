@@ -13,6 +13,9 @@ public class JwtProperties {
     @Value("${jwt.secret-key}")
     private String secretKey;
 
+    @Value("${jwt.secret-key.refresh-token}")
+    private String refreshTokenSecretKey;
+
     @Value("${jwt.access-token-exptime}")
     @Getter(AccessLevel.NONE)
     private Duration accessTokenExpiration;

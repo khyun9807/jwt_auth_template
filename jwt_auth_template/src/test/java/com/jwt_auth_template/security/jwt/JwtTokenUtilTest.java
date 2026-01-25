@@ -70,7 +70,7 @@ class JwtTokenUtilTest {
 
         RefreshTokenEntity saved = captor.getValue();
         Assertions.assertThat(saved.getMemberIdentifier()).isEqualTo(memberIdentifier);
-        Assertions.assertThat(saved.getRefreshToken()).isEqualTo(token);
+        Assertions.assertThat(saved.getHashedRefreshToken()).isEqualTo(token);
         Assertions.assertThat(saved.getExpiresAt()).isNotNull();
     }
 

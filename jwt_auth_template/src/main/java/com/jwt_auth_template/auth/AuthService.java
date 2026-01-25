@@ -44,6 +44,7 @@ public class AuthService {
         return memberService.save(member);
     }
 
+
     public String enrollNewAuthTokens(Member member,HttpServletResponse response) {
         return upsertNewAuthTokens(member.getMemberIdentifier(),response,new Date());
     }
@@ -55,11 +56,14 @@ public class AuthService {
         RefreshTokenEntity refreshTokenEntity =
                 jwtTokenUtil.generateRefreshTokenEntity(memberIdentifier, refreshToken);
 
+
+        jwtTokenUtil.generateCookieRefreshToken(refreshToken, response);
+
         jwtTokenUtil.upsertRefreshTokenEntity(refreshTokenEntity);
-        jwtTokenUtil.generateCookieRefreshToken(refreshTokenEntity, response);
 
         return accessToken;
     }
+
 
     public Member findMemberWithOauthToken(String oauthToken, AuthType authType) {
 
@@ -75,6 +79,7 @@ public class AuthService {
 
         return memberService.getActiveOAuthMember(oauthMemberInfo);
     }
+
 
     public String reissueAccessToken(String refreshToken, HttpServletResponse response) {
 

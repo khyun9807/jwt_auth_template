@@ -5,8 +5,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
-
 @Entity
 @Getter
 @Setter
@@ -21,16 +19,16 @@ public class RefreshTokenEntity {
     @Column(nullable = false,unique = true,updatable = false)
     private String memberIdentifier;
 
-    @Column(nullable = false)
-    private String refreshToken;
+    @Column(nullable = false,unique = true, updatable = false)
+    private String hashedRefreshToken;
 
     public static RefreshTokenEntity createRefreshToken(
             String memberIdentifier,
-            String refreshToken
+            String hashedRefreshToken
     ) {
         RefreshTokenEntity token = new RefreshTokenEntity();
         token.setMemberIdentifier(memberIdentifier);
-        token.setRefreshToken(refreshToken);
+        token.setHashedRefreshToken(hashedRefreshToken);
 
         return token;
     }
