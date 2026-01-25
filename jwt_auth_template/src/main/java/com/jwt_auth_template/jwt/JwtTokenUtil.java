@@ -10,12 +10,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -48,6 +51,7 @@ public class JwtTokenUtil {
                 .issuedAt(now)
                 .expiration(expDate)
                 .signWith(key)
+                .id(UUID.randomUUID().toString())
                 .compact();
     }
 
@@ -74,9 +78,11 @@ public class JwtTokenUtil {
         refreshTokenRepository.save(refreshTokenEntity);
     }
 
-    public void deleteAllRefreshTokenEntity(String memberIdentifier) {
-        refreshTokenRepository.deleteByMemberIdentifier(memberIdentifier);
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public int deleteAllRefreshTokenEntity(String memberIdentifier) {
+        int count = refreshTokenRepository.deleteByMemberIdentifier(memberIdentifier);
         refreshTokenRepository.flush();
+        return count;
     }
 
     public RefreshTokenEntity getRefreshTokenEntity(String refreshToken) {

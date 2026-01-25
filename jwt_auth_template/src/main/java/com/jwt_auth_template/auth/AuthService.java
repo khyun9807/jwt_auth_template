@@ -79,7 +79,7 @@ public class AuthService {
             //검증과 식별자 추출
             String memberIdentifier = jwtTokenUtil.getMemberIdentifier(refreshToken);
 
-            return enrollNewAuthTokens(memberIdentifier, response, refreshTokenEntity.getIssuedAt());
+            return  enrollNewAuthTokens(memberIdentifier, response, refreshTokenEntity.getIssuedAt());
         } catch (JwtValidAuthenticationException e) {
 
             switch (e.getErrorCode()) {
